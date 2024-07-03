@@ -10,14 +10,15 @@ import {
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
+import { Product } from './interfaces/product.interface';
 
 @Controller('products')
 export class ProductsController {
-  constructor(private readonly appService: ProductsService) {}
+  constructor(private readonly productsService: ProductsService) {}
 
   @Get()
-  getAll(): string {
-    return 'All products';
+  async getAll(): Promise<Product[]> {
+    return this.productsService.getAll();
   }
 
   @Get(':id')
@@ -26,8 +27,8 @@ export class ProductsController {
   }
 
   @Post()
-  createProduct(@Body() createProductDto: CreateProductDto): string {
-    return 'Create product';
+  createProduct(@Body() createProductDto: CreateProductDto): void {
+    this.productsService.create(createProductDto);
   }
 
   @Put(':id')

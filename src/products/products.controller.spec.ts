@@ -3,7 +3,7 @@ import { ProductsController } from './products.controller';
 import { ProductsService } from './products.service';
 
 describe('AppController', () => {
-  let appController: ProductsController;
+  let productsController: ProductsController;
 
   beforeEach(async () => {
     const app: TestingModule = await Test.createTestingModule({
@@ -11,12 +11,12 @@ describe('AppController', () => {
       providers: [ProductsService],
     }).compile();
 
-    appController = app.get<ProductsController>(ProductsController);
+    productsController = app.get<ProductsController>(ProductsController);
   });
 
   describe('root', () => {
-    it('should return "Hello World!"', () => {
-      expect(appController.getAll()).toBe('All products');
+    it('should return "Hello World!"', async () => {
+      expect(await productsController.getAll()).toEqual([]);
     });
   });
 });
