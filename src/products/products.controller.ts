@@ -19,20 +19,20 @@ export class ProductsController {
 
   @Get()
   async getAll(): Promise<Product[]> {
-    return this.productsService.getAll();
+    return this.productsService.findAll();
   }
 
   @Get(':id')
-  getById(@Param('id') id: string): string {
-    return `Product by ${id}`;
+  getById(@Param('id') id: string): Promise<Product> {
+    return this.productsService.findOne(id);
   }
 
   @Post()
   createProduct(
     @Req() request: Request,
     @Body() createProductDto: CreateProductDto,
-  ): void {
-    this.productsService.create(
+  ): Promise<Product> {
+    return this.productsService.create(
       createProductDto,
       request.headers['idempotency-key'],
     );
@@ -42,12 +42,12 @@ export class ProductsController {
   updateProduct(
     @Param('id') id: string,
     @Body() updateProductDto: UpdateProductDto,
-  ): string {
-    return `Update product by ${id}`;
+  ): Promise<Product> {
+    return this.productsService.update(id, updateProductDto);
   }
 
   @Delete(':id')
-  deleteProduct(@Param('id') id: string): string {
-    return `Delete product by ${id}`;
+  deleteProduct(@Param('id') id: string): Promise<Product> {
+    return this.productsService.delete(id);
   }
 }
