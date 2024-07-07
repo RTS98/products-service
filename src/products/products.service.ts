@@ -5,7 +5,7 @@ import { Product } from './interfaces/product.interface';
 export class ProductsService {
   private readonly products: Product[] = [];
 
-  public create(product: Product) {
+  public create(product: Product, idempotencyKey: string) {
     this.products.push(product);
   }
 

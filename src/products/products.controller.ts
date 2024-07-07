@@ -6,6 +6,7 @@ import {
   Param,
   Post,
   Put,
+  Req,
 } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
@@ -27,8 +28,14 @@ export class ProductsController {
   }
 
   @Post()
-  createProduct(@Body() createProductDto: CreateProductDto): void {
-    this.productsService.create(createProductDto);
+  createProduct(
+    @Req() request: Request,
+    @Body() createProductDto: CreateProductDto,
+  ): void {
+    this.productsService.create(
+      createProductDto,
+      request.headers['idempotency-key'],
+    );
   }
 
   @Put(':id')

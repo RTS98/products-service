@@ -7,6 +7,7 @@ export default class ProductsMiddleware implements NestMiddleware {
     const hash = createHash('sha1');
 
     hash.update(JSON.stringify(req.body));
+    req.headers['idempotency-key'] = hash.digest('hex');
 
     next();
   }
