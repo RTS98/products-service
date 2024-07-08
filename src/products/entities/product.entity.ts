@@ -1,4 +1,11 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { IdempotencyKey } from 'src/idempotency/entities/idempotency-key.entity';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  OneToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 
 @Entity()
 export class Product {
@@ -16,4 +23,8 @@ export class Product {
 
   @Column()
   quantity: number;
+
+  @OneToOne(() => IdempotencyKey)
+  @JoinColumn()
+  idempotencyKeyId: number;
 }

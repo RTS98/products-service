@@ -44,6 +44,7 @@ export class ProductsService {
         const newKey = new IdempotencyKey();
         newKey.key = idempotencyKey;
 
+        newProduct.idempotencyKeyId;
         newProduct = await queryRunner.manager.save(newProduct);
         await queryRunner.manager.save(newKey);
         await queryRunner.commitTransaction();
