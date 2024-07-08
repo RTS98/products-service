@@ -44,9 +44,9 @@ export class ProductsService {
         const newKey = new IdempotencyKey();
         newKey.key = idempotencyKey;
 
-        newProduct.idempotencyKeyId;
+        const { id } = await queryRunner.manager.save(newKey);
+        newProduct.idempotencyKey = id;
         newProduct = await queryRunner.manager.save(newProduct);
-        await queryRunner.manager.save(newKey);
         await queryRunner.commitTransaction();
       } else {
         newProduct = await queryRunner.manager.findOneBy(Product, newProduct);
@@ -66,8 +66,6 @@ export class ProductsService {
       ...product,
     });
 
-    console.log(updatedProduct);
-
     if (!updatedProduct) {
       throw new NotFoundException(`Product with id ${id} not found`);
     }
@@ -76,8 +74,25 @@ export class ProductsService {
   }
 
   async delete(id: string): Promise<Product> {
-    const product = await this.findOne(id);
+    const product = await this.productsRepository.findOne({
+      where: { id: +id },
+      relations: ['idempotencyKey'],
+    });
+    const queryRunner = this.dataSource.createQueryRunner();
 
-    return this.productsRepository.remove(product);
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      await queryRunner.manager.remove(product);
+      await queryRunner.manager.remove(product.idempotencyKey);
+      await queryRunner.commitTransaction();
+    } catch (err) {
+      await queryRunner.rollbackTransaction();
+    } finally {
+      await queryRunner.release();
+    }
+
+    return product;
   }
 }

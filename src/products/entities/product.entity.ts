@@ -26,5 +26,5 @@ export class Product {
 
   @OneToOne(() => IdempotencyKey)
   @JoinColumn()
-  idempotencyKeyId: number;
+  idempotencyKey: number;
 }
