@@ -8,11 +8,8 @@ const dataSource = new DataSource({
   password: 'postgres',
   database: 'products',
   synchronize: true,
-  entities: [
-    'dist/products/entities/*.entity{.ts,.js}',
-    'dist/idempotency/entities/*.entity{.ts,.js}',
-  ],
-  migrations: ['dist/migrations/*{.ts,.js}'],
+  entities: ['dist/products/entities/*.entity{.ts,.js}'],
+  migrations: ['dist/products/migrations/*{.ts,.js}'],
 });
 
 export default dataSource;

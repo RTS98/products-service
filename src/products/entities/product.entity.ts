@@ -1,4 +1,4 @@
-import { IdempotencyKey } from 'src/idempotency/entities/idempotency-key.entity';
+import { IdempotencyKey } from 'src/products/entities/idempotency-key.entity';
 import {
   Column,
   Entity,
