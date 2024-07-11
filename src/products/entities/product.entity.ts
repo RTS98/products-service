@@ -1,4 +1,3 @@
-import { IdempotencyKey } from 'src/products/entities/idempotency-key.entity';
 import {
   Column,
   Entity,
@@ -6,6 +5,7 @@ import {
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { IdempotencyKey } from './idempotency-key.entity';
 
 @Entity()
 export class Product {

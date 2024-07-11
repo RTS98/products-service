@@ -3,7 +3,7 @@ import { Product } from './entities/product.entity';
 import { DataSource, Repository } from 'typeorm';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
-import { IdempotencyKey } from 'src/products/entities/idempotency-key.entity';
+import { IdempotencyKey } from './entities/idempotency-key.entity';
 
 @Injectable()
 export class ProductsService {
