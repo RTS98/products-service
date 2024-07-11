@@ -1,4 +1,3 @@
-import { Exclude } from 'class-transformer';
 import { IdempotencyKey } from 'src/products/entities/idempotency-key.entity';
 import {
   Column,
@@ -25,7 +24,6 @@ export class Product {
   @Column()
   quantity: number;
 
-  @Exclude()
   @OneToOne(() => IdempotencyKey, {
     onDelete: 'CASCADE',
   })
