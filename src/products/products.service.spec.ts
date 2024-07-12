@@ -1,20 +1,16 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ProductsService } from './products.service';
-import {
-  getDataSourceToken,
-  getEntityManagerToken,
-  getRepositoryToken,
-} from '@nestjs/typeorm';
+import { getDataSourceToken, getRepositoryToken } from '@nestjs/typeorm';
 import { Product } from './entities/product.entity';
-import { IdempotencyKey } from './entities/idempotency-key.entity';
 import { NotFoundException } from '@nestjs/common';
 import { CreateProductDto } from './dto/create-product.dto';
+import { UpdateProductDto } from './dto/update-product.dto';
 
 describe('ProductsService', () => {
   let productsService: ProductsService;
   let productsRepository: any;
   let mockDataSource: any;
-  let mockManager: any;
+  let mockQueryRunner: any;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -27,22 +23,6 @@ describe('ProductsService', () => {
             createQueryRunner: jest.fn(),
           },
         },
-        // {
-        //   provide: getRepositoryToken(IdempotencyKey),
-        //   useValue: {
-        //     find: jest.fn(),
-        //     findOneBy: jest.fn(),
-        //     create: jest.fn(),
-        //     save: jest.fn(),
-        //   },
-        // },
-        {
-          provide: getEntityManagerToken(),
-          useValue: {
-            findOneBy: jest.fn(),
-            save: jest.fn(),
-          },
-        },
         {
           provide: getRepositoryToken(Product),
           useValue: {
@@ -53,13 +33,28 @@ describe('ProductsService', () => {
             save: jest.fn(),
           },
         },
+        {
+          provide: 'QueryRunner',
+          useValue: {
+            manager: {
+              findOneBy: jest.fn(),
+              remove: jest.fn(),
+              save: jest.fn(),
+            },
+            connect: jest.fn(),
+            startTransaction: jest.fn(),
+            commitTransaction: jest.fn(),
+            rollbackTransaction: jest.fn(),
+            release: jest.fn(),
+          },
+        },
       ],
     }).compile();
 
     productsService = module.get<ProductsService>(ProductsService);
     productsRepository = module.get(getRepositoryToken(Product));
     mockDataSource = module.get(getDataSourceToken());
-    mockManager = module.get(getEntityManagerToken());
+    mockQueryRunner = module.get('QueryRunner');
   });
 
   describe('find all', () => {
@@ -159,22 +154,15 @@ describe('ProductsService', () => {
 
       mockDataSource.getRepository.mockReturnValue(productsRepository);
       productsRepository.create.mockReturnValue({ ...product, id: 1 });
-      mockDataSource.createQueryRunner.mockReturnValue({
-        connect: jest.fn(),
-        startTransaction: jest.fn(),
-        manager: mockManager,
-        commitTransaction: jest.fn(),
-        rollbackTransaction: jest.fn(),
-        release: jest.fn(),
-      });
-      mockManager.save.mockReturnValue(savedProduct);
+      mockDataSource.createQueryRunner.mockReturnValue(mockQueryRunner);
+      mockQueryRunner.manager.save.mockReturnValue(savedProduct);
 
       const result = await productsService.create(product, 'key');
 
       expect(result).toEqual(savedProduct);
     });
     it('should not save the product if the idempotency key exists and return the existing product', async () => {
-      const product: CreateProductDto = {
+      const productDto: CreateProductDto = {
         title: 'bmw',
         price: 1000,
         description: 'car',
@@ -193,22 +181,112 @@ describe('ProductsService', () => {
       };
 
       mockDataSource.getRepository.mockReturnValue(productsRepository);
-      productsRepository.create.mockReturnValue({ ...product, id: 1 });
+      productsRepository.create.mockReturnValue(savedProduct);
       productsRepository.findOne.mockReturnValue(savedProduct);
-      mockDataSource.createQueryRunner.mockReturnValue({
-        connect: jest.fn(),
-        startTransaction: jest.fn(),
-        manager: mockManager,
-        commitTransaction: jest.fn(),
-        rollbackTransaction: jest.fn(),
-        release: jest.fn(),
-      });
-      mockManager.findOneBy.mockReturnValue({ id: 1, key: 'key' });
+      mockDataSource.createQueryRunner.mockReturnValue(mockQueryRunner);
+      mockQueryRunner.manager.findOneBy.mockReturnValue({ id: 1, key: 'key' });
 
-      const result = await productsService.create(product, 'key');
+      const result = await productsService.create(productDto, 'key');
 
       expect(result).toEqual(savedProduct);
       expect(productsRepository.save).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('update', () => {
+    it('should update a product and return it if it exists', async () => {
+      const updateProductDto: UpdateProductDto = {
+        price: 2000,
+        description: 'supersport car',
+      };
+      const product: Product = {
+        id: 1,
+        title: 'bmw',
+        price: 1000,
+        description: 'car',
+        quantity: 1,
+        idempotencyKey: {
+          id: 1,
+          key: 'key',
+        },
+      };
+      const updatedProduct: Product = {
+        id: 1,
+        title: 'bmw',
+        price: 2000,
+        description: 'supersport car',
+        quantity: 1,
+        idempotencyKey: {
+          id: 1,
+          key: 'key',
+        },
+      };
+
+      mockDataSource.getRepository.mockReturnValue(productsRepository);
+      productsRepository.preload.mockReturnValue({
+        ...product,
+        ...updateProductDto,
+      });
+      productsRepository.save.mockReturnValue(updatedProduct);
+
+      const result = await productsService.update(
+        product.id.toString(),
+        updateProductDto,
+      );
+
+      expect(result).toEqual(updatedProduct);
+    });
+
+    it("should throw an error if the product is not found and can't be updated", async () => {
+      const updateProductDto: UpdateProductDto = {
+        price: 2000,
+        description: 'supersport car',
+      };
+
+      mockDataSource.getRepository.mockReturnValue(productsRepository);
+      productsRepository.preload.mockReturnValue(undefined);
+
+      const result = productsService.update('1', updateProductDto);
+
+      await expect(result).rejects.toEqual(
+        new NotFoundException(`Product with id 1 not found`),
+      );
+    });
+  });
+
+  describe('delete', () => {
+    it("should delete a product and return it if it exists and it's deleted", async () => {
+      const deleteProduct: Product = {
+        id: 1,
+        title: 'bmw',
+        price: 1000,
+        description: 'car',
+        quantity: 2,
+        idempotencyKey: {
+          id: 1,
+          key: 'key',
+        },
+      };
+
+      mockDataSource.getRepository.mockReturnValue(productsRepository);
+      productsRepository.findOne.mockReturnValue(deleteProduct);
+      mockDataSource.createQueryRunner.mockReturnValue(mockQueryRunner);
+      mockQueryRunner.manager.remove.mockReturnValue(deleteProduct);
+
+      const result = await productsService.delete(deleteProduct.id.toString());
+
+      expect(result).toEqual(deleteProduct);
+    });
+
+    it("should throw an error if the product is not found and can't be deleted", async () => {
+      mockDataSource.getRepository.mockReturnValue(productsRepository);
+      productsRepository.findOne.mockReturnValue(undefined);
+
+      const result = productsService.delete('1');
+
+      await expect(result).rejects.toEqual(
+        new NotFoundException(`Product with id 1 not found`),
+      );
     });
   });
 });

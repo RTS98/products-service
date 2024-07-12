@@ -59,7 +59,6 @@ export class ProductsService {
         newProduct = await productsRepository.findOne({
           where: { idempotencyKey: key },
         });
-        console.log('Product already exists', newProduct);
       }
     } catch (err) {
       await queryRunner.rollbackTransaction();
