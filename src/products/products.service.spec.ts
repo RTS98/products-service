@@ -173,5 +173,42 @@ describe('ProductsService', () => {
 
       expect(result).toEqual(savedProduct);
     });
+    it('should not save the product if the idempotency key exists and return the existing product', async () => {
+      const product: CreateProductDto = {
+        title: 'bmw',
+        price: 1000,
+        description: 'car',
+        quantity: 2,
+      };
+      const savedProduct: Product = {
+        id: 1,
+        title: 'bmw',
+        price: 1000,
+        description: 'car',
+        quantity: 2,
+        idempotencyKey: {
+          id: 1,
+          key: 'key',
+        },
+      };
+
+      mockDataSource.getRepository.mockReturnValue(productsRepository);
+      productsRepository.create.mockReturnValue({ ...product, id: 1 });
+      productsRepository.findOne.mockReturnValue(savedProduct);
+      mockDataSource.createQueryRunner.mockReturnValue({
+        connect: jest.fn(),
+        startTransaction: jest.fn(),
+        manager: mockManager,
+        commitTransaction: jest.fn(),
+        rollbackTransaction: jest.fn(),
+        release: jest.fn(),
+      });
+      mockManager.findOneBy.mockReturnValue({ id: 1, key: 'key' });
+
+      const result = await productsService.create(product, 'key');
+
+      expect(result).toEqual(savedProduct);
+      expect(productsRepository.save).not.toHaveBeenCalled();
+    });
   });
 });
