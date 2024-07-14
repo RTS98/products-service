@@ -140,6 +140,7 @@ describe('Products Controller', () => {
         await productsController.updateProduct('1', updateProduct),
       ).toEqual(product);
     });
+
     it('should throw error when product with given id does not exist', async () => {
       const updateProduct: UpdateProductDto = {
         price: 2000,
@@ -154,6 +155,32 @@ describe('Products Controller', () => {
       await expect(
         productsController.updateProduct('1', updateProduct),
       ).rejects.toEqual(new NotFoundException('Product with id 1 not found'));
+    });
+  });
+  describe('delete', () => {
+    it('should delete product with given id', async () => {
+      const product: Product = {
+        id: 1,
+        title: 'bmw',
+        price: 1000,
+        description: 'car',
+        quantity: 1,
+      };
+
+      jest.spyOn(productsService, 'delete').mockResolvedValue(product);
+
+      expect(await productsController.deleteProduct('1')).toEqual(product);
+    });
+
+    it('should throw error when product with given id does not exist', async () => {
+      jest
+        .spyOn(productsService, 'delete')
+        .mockRejectedValue(
+          new NotFoundException('Product with id 1 not found'),
+        );
+      await expect(productsController.deleteProduct('1')).rejects.toEqual(
+        new NotFoundException('Product with id 1 not found'),
+      );
     });
   });
 });
