@@ -3,6 +3,8 @@ import { ProductsController } from './products.controller';
 import { ProductsService } from './products.service';
 import { Product } from './entities/product.entity';
 import { getDataSourceToken } from '@nestjs/typeorm';
+import { NotFoundException } from '@nestjs/common';
+import { CreateProductDto } from './dto/create-product.dto';
 
 const createQueryRunnerMock = () => ({
   manager: {
@@ -76,6 +78,44 @@ describe('AppController', () => {
 
       jest.spyOn(productsService, 'findOne').mockResolvedValue(product);
       expect(await productsController.getById('1')).toEqual(product);
+    });
+
+    it('should throw error when product with given id does not exist', async () => {
+      jest
+        .spyOn(productsService, 'findOne')
+        .mockRejectedValue(
+          new NotFoundException('Product with id 1 not found'),
+        );
+      await expect(productsController.getById('1')).rejects.toEqual(
+        new NotFoundException('Product with id 1 not found'),
+      );
+    });
+  });
+
+  describe('post', () => {
+    it('should create product', async () => {
+      const product: CreateProductDto = {
+        title: 'bmw',
+        price: 1000,
+        description: 'car',
+        quantity: 1,
+      };
+      const req: Partial<Request> = {
+        headers: new Headers(),
+      };
+
+      req.headers.set('idempotency-key', 'first-key');
+
+      jest
+        .spyOn(productsService, 'create')
+        .mockResolvedValue({ id: 1, ...product });
+
+      expect(
+        await productsController.createProduct(req as Request, product),
+      ).toEqual({
+        ...product,
+        id: 1,
+      });
     });
   });
 });
