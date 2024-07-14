@@ -5,6 +5,7 @@ import { Product } from './entities/product.entity';
 import { getDataSourceToken } from '@nestjs/typeorm';
 import { NotFoundException } from '@nestjs/common';
 import { CreateProductDto } from './dto/create-product.dto';
+import { UpdateProductDto } from './dto/update-product.dto';
 
 const createQueryRunnerMock = () => ({
   manager: {
@@ -24,7 +25,7 @@ const createDataSourceMock = () => ({
   createQueryRunner: jest.fn(createQueryRunnerMock),
 });
 
-describe('AppController', () => {
+describe('Products Controller', () => {
   let productsController: ProductsController;
   let productsService: ProductsService;
 
@@ -116,6 +117,43 @@ describe('AppController', () => {
         ...product,
         id: 1,
       });
+    });
+  });
+  describe('update', () => {
+    it("should update product's title", async () => {
+      const product: Product = {
+        id: 1,
+        title: 'bmw',
+        price: 2000,
+        description: 'supersport car',
+        quantity: 1,
+      };
+
+      const updateProduct: UpdateProductDto = {
+        price: 2000,
+        description: 'supersport car',
+      };
+
+      jest.spyOn(productsService, 'update').mockResolvedValue(product);
+
+      expect(
+        await productsController.updateProduct('1', updateProduct),
+      ).toEqual(product);
+    });
+    it('should throw error when product with given id does not exist', async () => {
+      const updateProduct: UpdateProductDto = {
+        price: 2000,
+        description: 'supersport car',
+      };
+
+      jest
+        .spyOn(productsService, 'update')
+        .mockRejectedValue(
+          new NotFoundException('Product with id 1 not found'),
+        );
+      await expect(
+        productsController.updateProduct('1', updateProduct),
+      ).rejects.toEqual(new NotFoundException('Product with id 1 not found'));
     });
   });
 });
