@@ -5,12 +5,41 @@ import { Product } from './entities/product.entity';
 import { NotFoundException } from '@nestjs/common';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
+import { DataSource, QueryRunner, Repository } from 'typeorm';
+
+type ManagerMock = {
+  findOneBy: jest.Mock;
+  remove: jest.Mock;
+  save: jest.Mock;
+};
+
+type MockType<T> = {
+  [P in keyof T]?: jest.Mock<NonNullable<unknown>> & ManagerMock;
+};
+
+const createQueryRunnerMock = () => ({
+  manager: {
+    findOneBy: jest.fn(),
+    remove: jest.fn(),
+    save: jest.fn(),
+  },
+  connect: jest.fn(),
+  startTransaction: jest.fn(),
+  commitTransaction: jest.fn(),
+  rollbackTransaction: jest.fn(),
+  release: jest.fn(),
+});
+
+const createDataSourceMock = () => ({
+  getRepository: jest.fn(),
+  createQueryRunner: jest.fn(createQueryRunnerMock),
+});
 
 describe('ProductsService', () => {
   let productsService: ProductsService;
-  let productsRepository: any;
-  let mockDataSource: any;
-  let mockQueryRunner: any;
+  let productsRepository: MockType<Repository<Product>>;
+  let mockDataSource: MockType<DataSource>;
+  let mockQueryRunner: MockType<QueryRunner>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -18,10 +47,7 @@ describe('ProductsService', () => {
         ProductsService,
         {
           provide: getDataSourceToken(),
-          useValue: {
-            getRepository: jest.fn(),
-            createQueryRunner: jest.fn(),
-          },
+          useFactory: createDataSourceMock,
         },
         {
           provide: getRepositoryToken(Product),
@@ -35,26 +61,17 @@ describe('ProductsService', () => {
         },
         {
           provide: 'QueryRunner',
-          useValue: {
-            manager: {
-              findOneBy: jest.fn(),
-              remove: jest.fn(),
-              save: jest.fn(),
-            },
-            connect: jest.fn(),
-            startTransaction: jest.fn(),
-            commitTransaction: jest.fn(),
-            rollbackTransaction: jest.fn(),
-            release: jest.fn(),
-          },
+          useValue: createQueryRunnerMock(),
         },
       ],
     }).compile();
 
     productsService = module.get<ProductsService>(ProductsService);
-    productsRepository = module.get(getRepositoryToken(Product));
-    mockDataSource = module.get(getDataSourceToken());
-    mockQueryRunner = module.get('QueryRunner');
+    productsRepository = module.get<MockType<Repository<Product>>>(
+      getRepositoryToken(Product),
+    );
+    mockDataSource = module.get<MockType<DataSource>>(getDataSourceToken());
+    mockQueryRunner = module.get<MockType<QueryRunner>>('QueryRunner');
   });
 
   describe('find all', () => {
