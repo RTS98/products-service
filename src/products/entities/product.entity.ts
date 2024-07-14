@@ -1,6 +1,7 @@
 import {
   Column,
   Entity,
+  IsNull,
   JoinColumn,
   OneToOne,
   PrimaryGeneratedColumn,
@@ -28,5 +29,5 @@ export class Product {
     onDelete: 'CASCADE',
   })
   @JoinColumn()
-  idempotencyKey: IdempotencyKey;
+  idempotencyKey?: IdempotencyKey;
 }
