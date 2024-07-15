@@ -1,6 +1,6 @@
-import { DataSource } from 'typeorm';
+import { DataSourceOptions } from 'typeorm';
 
-const dataSource = new DataSource({
+export default (): Partial<DataSourceOptions> => ({
   type: 'postgres',
   host: process.env.DATABASE_HOST,
   port: +process.env.DATABASE_PORT,
@@ -11,5 +11,3 @@ const dataSource = new DataSource({
   entities: ['dist/products/entities/*.entity{.ts,.js}'],
   migrations: ['dist/products/migrations/*{.ts,.js}'],
 });
-
-export default dataSource;
