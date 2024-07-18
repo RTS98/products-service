@@ -10,6 +10,7 @@ services:
 
   products:
     build: .
+    image: robertst98/products
     environment:
       - DATABASE_HOST=postgres
       - DATABASE_USERNAME=${DATABASE_USERNAME}
@@ -18,4 +19,5 @@ services:
     ports:
       - '3000:3000'
     depends_on:
-      - postgres
+      postgres:
+        condition: service_started
