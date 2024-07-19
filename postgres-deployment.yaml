@@ -23,11 +23,20 @@ spec:
       containers:
         - env:
             - name: POSTGRES_DB
-              value: $(DATABASE_NAME)
+              valueFrom:
+                secretKeyRef:
+                  name: database
+                  key: database-name
             - name: POSTGRES_USERNAME
-              value: $(DATABASE_USERNAME)
+              valueFrom:
+                secretKeyRef:
+                  name: database
+                  key: database-username
             - name: POSTGRES_PASSWORD
-              value: $(DATABASE_PASSWORD)
+              valueFrom:
+                secretKeyRef:
+                  name: database
+                  key: database-password
           image: postgres
           name: postgres
           ports:

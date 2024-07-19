@@ -24,12 +24,21 @@ spec:
         - env:
             - name: DATABASE_HOST
               value: postgres
-            - name: DATABASE_NAME
-              value: $(DATABASE_NAME)
             - name: DATABASE_USERNAME
-              value: $(DATABASE_USERNAME)
+              valueFrom:
+                secretKeyRef:
+                  name: database
+                  key: database-username
             - name: DATABASE_PASSWORD
-              value: $(DATABASE_PASSWORD)
+              valueFrom:
+                secretKeyRef:
+                  name: database
+                  key: database-password
+            - name: DATABASE_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: database
+                  key: database-name
           image: robertst98/products
           name: products
           ports:
