@@ -8,7 +8,7 @@ metadata:
     io.kompose.service: products
   name: products
 spec:
-  replicas: 1
+  replicas: 3
   selector:
     matchLabels:
       io.kompose.service: products
@@ -44,4 +44,15 @@ spec:
           ports:
             - containerPort: 3000
               protocol: TCP
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                  - key: io.kompose.service
+                    operator: In
+                    values:
+                      - products
+              topologyKey: "kubernetes.io/hostname"
+
       restartPolicy: Always

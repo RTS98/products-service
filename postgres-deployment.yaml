@@ -8,7 +8,7 @@ metadata:
     io.kompose.service: postgres
   name: postgres
 spec:
-  replicas: 1
+  replicas: 3
   selector:
     matchLabels:
       io.kompose.service: postgres
@@ -42,4 +42,14 @@ spec:
           ports:
             - containerPort: 5432
               protocol: TCP
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                  - key: io.kompose.service
+                    operator: In
+                    values:
+                      - postgres
+              topologyKey: "kubernetes.io/hostname"
       restartPolicy: Always
