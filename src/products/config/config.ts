@@ -7,7 +7,7 @@ export default (): Partial<DataSourceOptions> => ({
   username: process.env.DATABASE_USERNAME,
   password: process.env.DATABASE_PASSWORD,
   database: process.env.DATABASE_NAME,
-  synchronize: true,
+  synchronize: process.env.ENVIRONMENT !== 'production',
   entities: ['dist/products/entities/*.entity{.ts,.js}'],
   migrations: ['dist/products/migrations/*{.ts,.js}'],
 });
