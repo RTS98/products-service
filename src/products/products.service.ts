@@ -43,12 +43,12 @@ export class ProductsService {
 
     try {
       const key = await queryRunner.manager.findOneBy(IdempotencyKey, {
-        key: idempotencyKey,
+        value: idempotencyKey,
       });
 
       if (!key) {
         const newKey = new IdempotencyKey();
-        newKey.key = idempotencyKey;
+        newKey.value = idempotencyKey;
 
         const key = await queryRunner.manager.save(newKey);
         newProduct.idempotencyKey = key;

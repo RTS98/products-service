@@ -27,6 +27,6 @@ export class Product {
   @OneToOne(() => IdempotencyKey, {
     onDelete: 'CASCADE',
   })
-  @JoinColumn()
+  @JoinColumn({ name: 'idempotency_key_id' })
   idempotencyKey?: IdempotencyKey;
 }

@@ -85,7 +85,7 @@ describe('ProductsService', () => {
           quantity: 1,
           idempotencyKey: {
             id: 1,
-            key: 'key',
+            value: 'key',
           },
         },
         {
@@ -94,7 +94,7 @@ describe('ProductsService', () => {
           price: 2000,
           description: 'car',
           quantity: 2,
-          idempotencyKey: { id: 2, key: 'second-key' },
+          idempotencyKey: { id: 2, value: 'second-key' },
         },
       ];
 
@@ -116,7 +116,7 @@ describe('ProductsService', () => {
         quantity: 1,
         idempotencyKey: {
           id: 1,
-          key: 'first-key',
+          value: 'first-key',
         },
       };
 
@@ -136,7 +136,7 @@ describe('ProductsService', () => {
         quantity: 1,
         idempotencyKey: {
           id: 1,
-          key: 'first-key',
+          value: 'first-key',
         },
       };
       mockDataSource.getRepository.mockReturnValue(productsRepository);
@@ -165,7 +165,7 @@ describe('ProductsService', () => {
         quantity: 2,
         idempotencyKey: {
           id: 1,
-          key: 'key',
+          value: 'key',
         },
       };
 
@@ -193,7 +193,7 @@ describe('ProductsService', () => {
         quantity: 2,
         idempotencyKey: {
           id: 1,
-          key: 'key',
+          value: 'key',
         },
       };
 
@@ -224,7 +224,7 @@ describe('ProductsService', () => {
         quantity: 1,
         idempotencyKey: {
           id: 1,
-          key: 'key',
+          value: 'key',
         },
       };
       const updatedProduct: Product = {
@@ -235,7 +235,7 @@ describe('ProductsService', () => {
         quantity: 1,
         idempotencyKey: {
           id: 1,
-          key: 'key',
+          value: 'key',
         },
       };
 
@@ -281,7 +281,7 @@ describe('ProductsService', () => {
         quantity: 2,
         idempotencyKey: {
           id: 1,
-          key: 'key',
+          value: 'key',
         },
       };
 

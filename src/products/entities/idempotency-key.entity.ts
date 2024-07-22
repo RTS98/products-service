@@ -6,5 +6,5 @@ export class IdempotencyKey {
   id: number;
 
   @Column()
-  key: string;
+  value: string;
 }
