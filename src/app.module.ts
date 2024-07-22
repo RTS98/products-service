@@ -8,13 +8,13 @@ import { ProductsModule } from './products/products.module';
 import ProductsMiddleware from './products/middlewares/products.middleware';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
-import config from './products/config/config';
+import { configTypeOrm } from './products/config/config';
 
 @Module({
   imports: [
     ProductsModule,
     ConfigModule.forRoot(),
-    TypeOrmModule.forRoot(config()),
+    TypeOrmModule.forRoot(configTypeOrm()),
   ],
 })
 export class AppModule implements NestModule {

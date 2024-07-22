@@ -1,6 +1,9 @@
-import { DataSourceOptions } from 'typeorm';
+import { DataSource, DataSourceOptions } from 'typeorm';
+import dotenv from 'dotenv';
 
-export default (): Partial<DataSourceOptions> => ({
+dotenv.config();
+
+const dataSourceOptions: DataSourceOptions = {
   type: 'postgres',
   host: process.env.DATABASE_HOST,
   port: +process.env.DATABASE_PORT,
@@ -10,4 +13,12 @@ export default (): Partial<DataSourceOptions> => ({
   synchronize: process.env.ENVIRONMENT !== 'production',
   entities: ['dist/products/entities/*.entity{.ts,.js}'],
   migrations: ['dist/products/migrations/*{.ts,.js}'],
-});
+};
+
+const config = new DataSource(dataSourceOptions);
+
+export default config;
+
+export function configTypeOrm(): Partial<DataSourceOptions> {
+  return dataSourceOptions;
+}
