@@ -18,6 +18,7 @@ services:
       - DATABASE_USERNAME=${DATABASE_USERNAME}
       - DATABASE_PASSWORD=${DATABASE_PASSWORD}
       - DATABASE_NAME=${DATABASE_NAME}
+      - ENVIRONMENT=${ENVIRONMENT}
     ports:
       - '3000:3000'
     depends_on:
