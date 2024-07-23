@@ -2,12 +2,12 @@ SELECT 'CREATE DATABASE products'
 WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'products')\gexec
 
 CREATE TABLE IF NOT EXISTS idempotency_key (
-    id integer PRIMARY KEY,
+    id SERIAL PRIMARY KEY,
     "value" varchar(255) NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS product (
-    id integer PRIMARY KEY,
+    id SERIAL PRIMARY KEY,
     title varchar(50) NOT NULL,
     price integer NOT NULL,
     quantity integer NOT NULL,
