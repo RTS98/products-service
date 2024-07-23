@@ -39,20 +39,14 @@ spec:
                 secretKeyRef:
                   name: database
                   key: database-name
+            - name: ENVIRONMENT
+              valueFrom:
+                secretKeyRef:
+                  name: database
+                  key: database-environment
           image: robertst98/products
           name: products
           ports:
             - containerPort: 3000
               protocol: TCP
-      affinity:
-        podAntiAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-            - labelSelector:
-                matchExpressions:
-                  - key: io.kompose.service
-                    operator: In
-                    values:
-                      - products
-              topologyKey: "kubernetes.io/hostname"
-
       restartPolicy: Always

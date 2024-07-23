@@ -12,6 +12,8 @@ spec:
   selector:
     matchLabels:
       io.kompose.service: postgres
+  strategy:
+    type: Recreate
   template:
     metadata:
       annotations:
@@ -42,14 +44,16 @@ spec:
           ports:
             - containerPort: 5432
               protocol: TCP
-      affinity:
-        podAntiAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-            - labelSelector:
-                matchExpressions:
-                  - key: io.kompose.service
-                    operator: In
-                    values:
-                      - postgres
-              topologyKey: "kubernetes.io/hostname"
+          volumeMounts:
+            - mountPath: /docker-entrypoint-initdb.d/init-db.sql
+              name: postgres-config
+              subPath: init-db.sql
+              readOnly: true
       restartPolicy: Always
+      volumes:
+        - name: postgres-config
+          configMap:
+            items:
+              - key: init-db.sql
+                path: init-db.sql
+            name: postgres-config
