@@ -58,6 +58,7 @@ export class ProductsService {
       } else {
         newProduct = await productsRepository.findOne({
           where: { idempotencyKey: key },
+          relations: ['idempotencyKey'],
         });
       }
     } catch (err) {

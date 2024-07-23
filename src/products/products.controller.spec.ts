@@ -54,6 +54,10 @@ describe('Products Controller', () => {
           price: 1000,
           description: 'car',
           quantity: 1,
+          idempotencyKey: {
+            id: 1,
+            value: 'first-key',
+          },
         },
         {
           id: 2,
@@ -61,6 +65,10 @@ describe('Products Controller', () => {
           price: 2000,
           description: 'car',
           quantity: 2,
+          idempotencyKey: {
+            id: 1,
+            value: 'second-key',
+          },
         },
       ];
 
@@ -75,6 +83,10 @@ describe('Products Controller', () => {
         price: 1000,
         description: 'car',
         quantity: 1,
+        idempotencyKey: {
+          id: 1,
+          value: 'first-key',
+        },
       };
 
       jest.spyOn(productsService, 'findOne').mockResolvedValue(product);
@@ -107,15 +119,18 @@ describe('Products Controller', () => {
 
       req.headers.set('idempotency-key', 'first-key');
 
-      jest
-        .spyOn(productsService, 'create')
-        .mockResolvedValue({ id: 1, ...product });
+      jest.spyOn(productsService, 'create').mockResolvedValue({
+        id: 1,
+        ...product,
+        idempotencyKey: { id: 1, value: 'first-key' },
+      });
 
       expect(
         await productsController.createProduct(req as Request, product),
       ).toEqual({
-        ...product,
         id: 1,
+        ...product,
+        idempotencyKey: { id: 1, value: 'first-key' },
       });
     });
   });
@@ -127,6 +142,10 @@ describe('Products Controller', () => {
         price: 2000,
         description: 'supersport car',
         quantity: 1,
+        idempotencyKey: {
+          id: 1,
+          value: 'first-key',
+        },
       };
 
       const updateProduct: UpdateProductDto = {
@@ -165,6 +184,10 @@ describe('Products Controller', () => {
         price: 1000,
         description: 'car',
         quantity: 1,
+        idempotencyKey: {
+          id: 1,
+          value: 'first-key',
+        },
       };
 
       jest.spyOn(productsService, 'delete').mockResolvedValue(product);
