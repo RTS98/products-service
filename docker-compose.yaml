@@ -1,26 +1,30 @@
 services:
   postgres:
-    image: postgres
+    image: postgres:16.3
+    command: 'postgres -c config_file=/config/postgresql.conf'
     environment:
-      - POSTGRES_USERNAME=${DATABASE_USERNAME}
-      - POSTGRES_PASSWORD=${DATABASE_PASSWORD}
-      - POSTGRES_DB=${DATABASE_NAME}
+      POSTGRES_USER: ${DATABASE_USERNAME}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+      POSTGRES_DB: ${DATABASE_NAME}
+      PGDATA: '/data'
     volumes:
-      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+      - ./database/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+      - ./pgdata:/data
+      - ./database/config:/config/
     ports:
       - '5432:5432'
 
-  products:
-    build: .
-    image: robertst98/products
-    environment:
-      - DATABASE_HOST=postgres
-      - DATABASE_USERNAME=${DATABASE_USERNAME}
-      - DATABASE_PASSWORD=${DATABASE_PASSWORD}
-      - DATABASE_NAME=${DATABASE_NAME}
-      - ENVIRONMENT=${ENVIRONMENT}
-    ports:
-      - '3000:3000'
-    depends_on:
-      postgres:
-        condition: service_started
+  # products:
+  #   build: .
+  #   image: robertst98/products
+  #   environment:
+  #     - DATABASE_HOST=postgres
+  #     - DATABASE_USERNAME=${DATABASE_USERNAME}
+  #     - DATABASE_PASSWORD=${DATABASE_PASSWORD}
+  #     - DATABASE_NAME=${DATABASE_NAME}
+  #     - ENVIRONMENT=${ENVIRONMENT}
+  #   ports:
+  #     - '3000:3000'
+  #   depends_on:
+  #     postgres:
+  #       condition: service_started
