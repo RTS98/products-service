@@ -1,5 +1,5 @@
 services:
-  postgres:
+  postgres-1:
     image: postgres:16.3
     command: 'postgres -c config_file=/config/postgresql.conf'
     environment:
@@ -7,24 +7,73 @@ services:
       POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
       POSTGRES_DB: ${DATABASE_NAME}
       PGDATA: '/data'
+    networks:
+      - postgres
     volumes:
       - ./database/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
-      - ./pgdata:/data
-      - ./database/config:/config/
+      - ./database/postgres-1/pgdata:/data
+      - ./database/postgres-1/config:/config/
+      - ./database/postgres-1/archive:/mnt/server/archive
     ports:
       - '5432:5432'
 
-  # products:
-  #   build: .
-  #   image: robertst98/products
-  #   environment:
-  #     - DATABASE_HOST=postgres
-  #     - DATABASE_USERNAME=${DATABASE_USERNAME}
-  #     - DATABASE_PASSWORD=${DATABASE_PASSWORD}
-  #     - DATABASE_NAME=${DATABASE_NAME}
-  #     - ENVIRONMENT=${ENVIRONMENT}
-  #   ports:
-  #     - '3000:3000'
-  #   depends_on:
-  #     postgres:
-  #       condition: service_started
+  postgres-2:
+    image: postgres:16.3
+    command: 'postgres -c config_file=/config/postgresql.conf'
+    environment:
+      POSTGRES_USER: ${DATABASE_USERNAME}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+      POSTGRES_DB: ${DATABASE_NAME}
+      PGDATA: '/data'
+    networks:
+      - postgres
+    volumes:
+      # - ./database/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+      - ./database/postgres-2/pgdata:/data
+      - ./database/postgres-2/config:/config/
+      - ./database/postgres-2/archive:/mnt/server/archive
+    depends_on:
+      - postgres-1
+    ports:
+      - '5433:5432'
+
+  postgres-3:
+    image: postgres:16.3
+    command: 'postgres -c config_file=/config/postgresql.conf'
+    environment:
+      POSTGRES_USER: ${DATABASE_USERNAME}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+      POSTGRES_DB: ${DATABASE_NAME}
+      PGDATA: '/data'
+    networks:
+      - postgres
+    depends_on:
+      - postgres-1
+    volumes:
+      # - ./database/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+      - ./database/postgres-3/pgdata:/data
+      - ./database/postgres-3/config:/config/
+      - ./database/postgres-3/archive:/mnt/server/archive
+    ports:
+      - '5434:5432'
+
+  products:
+    build: .
+    image: robertst98/products
+    networks:
+      - postgres
+    environment:
+      - DATABASE_HOST=postgres-1
+      - DATABASE_USERNAME=${DATABASE_USERNAME}
+      - DATABASE_PASSWORD=${DATABASE_PASSWORD}
+      - DATABASE_NAME=${DATABASE_NAME}
+      - ENVIRONMENT=${ENVIRONMENT}
+    ports:
+      - '3000:3000'
+    depends_on:
+      postgres-1:
+        condition: service_started
+
+networks:
+  postgres:
+    driver: bridge
