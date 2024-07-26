@@ -28,7 +28,6 @@ services:
     networks:
       - postgres
     volumes:
-      # - ./database/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
       - ./database/postgres-2/pgdata:/data
       - ./database/postgres-2/config:/config/
       - ./database/postgres-2/archive:/mnt/server/archive
@@ -50,7 +49,6 @@ services:
     depends_on:
       - postgres-1
     volumes:
-      # - ./database/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
       - ./database/postgres-3/pgdata:/data
       - ./database/postgres-3/config:/config/
       - ./database/postgres-3/archive:/mnt/server/archive
