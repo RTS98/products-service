@@ -49,4 +49,14 @@ spec:
           ports:
             - containerPort: 3000
               protocol: TCP
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                  - key: io.kompose.service
+                    operator: In
+                    values:
+                      - products
+              topologyKey: "kubernetes.io/hostname"
       restartPolicy: Always

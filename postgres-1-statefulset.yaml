@@ -1,0 +1,88 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.34.0 (HEAD)
+  labels:
+    io.kompose.service: postgres
+  name: postgres-1
+spec:
+  replicas: 1
+  serviceName: postgres
+  selector:
+    matchLabels:
+      io.kompose.service: postgres
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert
+        kompose.version: 1.34.0 (HEAD)
+      labels:
+        io.kompose.service: postgres
+    spec:
+      containers:
+        - args:
+            - postgres
+            - -c
+            - config_file=/config/postgresql.conf
+          env:
+            - name: PGDATA
+              value: /data
+            - name: POSTGRES_DB
+              valueFrom:
+                secretKeyRef:
+                  name: database
+                  key: database-name
+            - name: POSTGRES_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: database
+                  key: database-username
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: database
+                  key: database-password
+          image: postgres:16.3
+          name: postgres-1
+          ports:
+            - containerPort: 5432
+              protocol: TCP
+          volumeMounts:
+            - mountPath: /docker-entrypoint-initdb.d/init-db.sql
+              name: postgres-1-initdb
+              subPath: init-db.sql
+            - mountPath: /data
+              name: postgres-1-data
+            - mountPath: /config
+              name: postgres-1-config
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                  - key: io.kompose.service
+                    operator: In
+                    values:
+                      - postgres-1
+              topologyKey: "kubernetes.io/hostname"
+      restartPolicy: Always
+      volumes:
+        - configMap:
+            items:
+              - key: init-db.sql
+                path: init-db.sql
+            name: postgres-1-initdb
+          name: postgres-1-initdb
+        - configMap:
+            name: postgres-1-config
+          name: postgres-1-config
+  volumeClaimTemplates:
+    - metadata:
+        name: postgres-1-data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 10Gi
