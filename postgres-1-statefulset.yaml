@@ -51,12 +51,19 @@ spec:
               protocol: TCP
           volumeMounts:
             - mountPath: /docker-entrypoint-initdb.d/init-db.sql
-              name: postgres-1-initdb
-              subPath: init-db.sql
-            - mountPath: /data
-              name: postgres-1-data
-            - mountPath: /config
               name: postgres-1-config
+              subPath: init-db.sql
+            - mountPath: /config/postgresql.conf
+              name: postgres-1-config
+              subPath: postgresql.conf
+            - mountPath: /config/pg_hba.conf
+              name: postgres-1-config
+              subPath: pg_hba.conf
+            - mountPath: /config/pg_ident.conf
+              name: postgres-1-config
+              subPath: pg_ident.conf
+            - mountPath: /data
+              name: postgres-data
       affinity:
         podAntiAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
@@ -73,14 +80,17 @@ spec:
             items:
               - key: init-db.sql
                 path: init-db.sql
-            name: postgres-1-initdb
-          name: postgres-1-initdb
-        - configMap:
+              - key: pg_hba.conf
+                path: pg_hba.conf
+              - key: pg_ident.conf
+                path: pg_ident.conf
+              - key: postgresql.conf
+                path: postgresql.conf
             name: postgres-1-config
           name: postgres-1-config
   volumeClaimTemplates:
     - metadata:
-        name: postgres-1-data
+        name: postgres-data
       spec:
         accessModes: ["ReadWriteOnce"]
         resources:
