@@ -21,6 +21,10 @@ data:
               REFERENCES idempotency_key(id)
               ON DELETE CASCADE
     );
+  create-archive-dir.sh: |-
+    pg_ctl -D /var/lib/postgresql/data/ -m fast -w stop
+    rm -rf /data
+    # mkdir -p /data/archive && chown -R 999:999 /data/archive
   pg_hba.conf: |-
     # TYPE  DATABASE        USER            ADDRESS                 METHOD
 

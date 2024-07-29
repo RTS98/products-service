@@ -6,7 +6,7 @@ metadata:
     kompose.version: 1.34.0 (HEAD)
   labels:
     io.kompose.service: postgres
-  name: postgres-1
+  name: postgres
 spec:
   replicas: 1
   serviceName: postgres
@@ -21,6 +21,17 @@ spec:
       labels:
         io.kompose.service: postgres
     spec:
+      initContainers:
+        - name: init
+          image: postgres:16.3
+          command: ["bash", "-c"]
+          args:
+            - |
+              mkdir -p /data/archive && chown -R 999:999 /data/archive
+          volumeMounts:
+            - name: postgres-data
+              mountPath: /data
+              readOnly: false
       containers:
         - args:
             - postgres
@@ -34,7 +45,7 @@ spec:
                 secretKeyRef:
                   name: database
                   key: database-name
-            - name: POSTGRES_USERNAME
+            - name: POSTGRES_USER
               valueFrom:
                 secretKeyRef:
                   name: database
@@ -64,6 +75,10 @@ spec:
               subPath: pg_ident.conf
             - mountPath: /data
               name: postgres-data
+            # - mountPath: /data/archive
+            #   name: postgres-1-config
+            #   subPath: create-archive-dir.sh
+            #   readOnly: false
       affinity:
         podAntiAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
@@ -91,6 +106,8 @@ spec:
   volumeClaimTemplates:
     - metadata:
         name: postgres-data
+        labels:
+          io.kompose.service: postgres
       spec:
         accessModes: ["ReadWriteOnce"]
         resources:
