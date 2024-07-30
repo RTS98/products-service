@@ -21,17 +21,6 @@ spec:
       labels:
         io.kompose.service: postgres
     spec:
-      initContainers:
-        - name: init
-          image: postgres:16.3
-          command: ["bash", "-c"]
-          args:
-            - |
-              mkdir -p /data/archive && chown -R 999:999 /data/archive
-          volumeMounts:
-            - name: postgres-data
-              mountPath: /data
-              readOnly: false
       containers:
         - args:
             - postgres
@@ -39,7 +28,7 @@ spec:
             - config_file=/config/postgresql.conf
           env:
             - name: PGDATA
-              value: /data
+              value: /data/pgdata
             - name: POSTGRES_DB
               valueFrom:
                 secretKeyRef:
@@ -73,12 +62,13 @@ spec:
             - mountPath: /config/pg_ident.conf
               name: postgres-1-config
               subPath: pg_ident.conf
-            - mountPath: /data
+            - mountPath: /data/archive
+              name: postgres-1-config
+              subPath: create-archive-dir.sh
+              readOnly: false
+            - mountPath: /data/pgdata
               name: postgres-data
-            # - mountPath: /data/archive
-            #   name: postgres-1-config
-            #   subPath: create-archive-dir.sh
-            #   readOnly: false
+              readOnly: false
       affinity:
         podAntiAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
@@ -101,6 +91,8 @@ spec:
                 path: pg_ident.conf
               - key: postgresql.conf
                 path: postgresql.conf
+              - key: create-archive-dir.sh
+                path: create-archive-dir.sh
             name: postgres-1-config
           name: postgres-1-config
   volumeClaimTemplates:
