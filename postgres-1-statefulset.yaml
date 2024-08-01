@@ -21,9 +21,24 @@ spec:
       labels:
         io.kompose.service: postgres
     spec:
+      initContainers:
+        - name: init
+          image: postgres:16.3
+          command: ["bash", "-c"]
+          args:
+            - |
+              mkdir -p /data/archive && \
+              chown -R 999:999 /data/archive
+          securityContext:
+            runAsUser: 999
+            runAsGroup: 999
+            fsGroup: 999
+          volumeMounts:
+            - mountPath: /data
+              name: postgres-data
+              readOnly: false
       containers:
         - args:
-            - postgres
             - -c
             - config_file=/config/postgresql.conf
           env:
@@ -62,10 +77,6 @@ spec:
             - mountPath: /config/pg_ident.conf
               name: postgres-1-config
               subPath: pg_ident.conf
-            - mountPath: /data/archive
-              name: postgres-1-config
-              subPath: create-archive-dir.sh
-              readOnly: false
             - mountPath: /data/pgdata
               name: postgres-data
               readOnly: false
@@ -82,17 +93,17 @@ spec:
       restartPolicy: Always
       volumes:
         - configMap:
-            items:
-              - key: init-db.sql
-                path: init-db.sql
-              - key: pg_hba.conf
-                path: pg_hba.conf
-              - key: pg_ident.conf
-                path: pg_ident.conf
-              - key: postgresql.conf
-                path: postgresql.conf
-              - key: create-archive-dir.sh
-                path: create-archive-dir.sh
+            # items:
+            #   - key: init-db.sql
+            #     path: init-db.sql
+            #   # - key: init-archive.sh
+            #   #   path: init-archive.sh
+            #   - key: pg_hba.conf
+            #     path: pg_hba.conf
+            #   - key: pg_ident.conf
+            #     path: pg_ident.conf
+            #   - key: postgresql.conf
+            #     path: postgresql.conf
             name: postgres-1-config
           name: postgres-1-config
   volumeClaimTemplates:

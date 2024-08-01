@@ -21,8 +21,6 @@ data:
               REFERENCES idempotency_key(id)
               ON DELETE CASCADE
     );
-  create-archive-dir.sh: |-
-    mkdir /data/archive && chown -R 999:999 /data/archive
   pg_hba.conf: |-
     # TYPE  DATABASE        USER            ADDRESS                 METHOD
 
@@ -145,5 +143,5 @@ data:
 kind: ConfigMap
 metadata:
   labels:
-    io.kompose.service: postgres-1
+    io.kompose.service: postgres
   name: postgres-1-config
