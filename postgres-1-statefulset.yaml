@@ -30,12 +30,12 @@ spec:
               mkdir -p /data/archive && \
               chown -R 999:999 /data/archive
           securityContext:
-            runAsUser: 999
-            runAsGroup: 999
-            fsGroup: 999
+            runAsUser: 0
+            runAsGroup: 0
           volumeMounts:
             - mountPath: /data
               name: postgres-data
+              subPath: pgdata
               readOnly: false
       containers:
         - args:
@@ -60,25 +60,18 @@ spec:
                   name: database
                   key: database-password
           image: postgres:16.3
-          name: postgres-1
+          name: postgres
           ports:
             - containerPort: 5432
               protocol: TCP
           volumeMounts:
-            - mountPath: /docker-entrypoint-initdb.d/init-db.sql
+            - mountPath: /docker-entrypoint-initdb.d
+              name: init-db-config
+            - mountPath: /config
               name: postgres-1-config
-              subPath: init-db.sql
-            - mountPath: /config/postgresql.conf
-              name: postgres-1-config
-              subPath: postgresql.conf
-            - mountPath: /config/pg_hba.conf
-              name: postgres-1-config
-              subPath: pg_hba.conf
-            - mountPath: /config/pg_ident.conf
-              name: postgres-1-config
-              subPath: pg_ident.conf
-            - mountPath: /data/pgdata
+            - mountPath: /data
               name: postgres-data
+              subPath: pgdata
               readOnly: false
       affinity:
         podAntiAffinity:
@@ -88,24 +81,16 @@ spec:
                   - key: io.kompose.service
                     operator: In
                     values:
-                      - postgres-1
+                      - postgres
               topologyKey: "kubernetes.io/hostname"
       restartPolicy: Always
       volumes:
         - configMap:
-            # items:
-            #   - key: init-db.sql
-            #     path: init-db.sql
-            #   # - key: init-archive.sh
-            #   #   path: init-archive.sh
-            #   - key: pg_hba.conf
-            #     path: pg_hba.conf
-            #   - key: pg_ident.conf
-            #     path: pg_ident.conf
-            #   - key: postgresql.conf
-            #     path: postgresql.conf
             name: postgres-1-config
           name: postgres-1-config
+        - configMap:
+            name: init-db-config
+          name: init-db-config
   volumeClaimTemplates:
     - metadata:
         name: postgres-data
