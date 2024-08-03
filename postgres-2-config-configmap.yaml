@@ -1,0 +1,128 @@
+apiVersion: v1
+data:
+  pg_hba.conf: |-
+    # TYPE  DATABASE        USER            ADDRESS                 METHOD
+
+    # "local" is for Unix domain socket connections only
+    local   all             all                                     trust
+    # IPv4 local connections:
+    host    all             all             127.0.0.1/32            trust
+    # IPv6 local connections:
+    host    all             all             ::1/128                 trust
+    # Allow replication connections from localhost, by a user with the
+    # replication privilege.
+    local   replication     all                                     trust
+    host    replication     all             127.0.0.1/32            trust
+    host    replication     all             ::1/128                 trust
+
+    host all all all scram-sha-256
+  pg_ident.conf: |
+    # PostgreSQL User Name Maps
+    # =========================
+    #
+    # ---------------
+    # Mapping Records
+    # ---------------
+    #
+    # Refer to the PostgreSQL documentation, chapter "Client
+    # Authentication" for a complete description.  A short synopsis
+    # follows.
+    #
+    # This file controls PostgreSQL user name mapping.  It maps external
+    # user names to their corresponding PostgreSQL user names.  Records
+    # are of the form:
+    #
+    # MAPNAME  SYSTEM-USERNAME  PG-USERNAME
+    #
+    # (The uppercase quantities must be replaced by actual values.)
+    #
+    # MAPNAME is the (otherwise freely chosen) map name that was used in
+    # pg_hba.conf.  SYSTEM-USERNAME is the detected user name of the
+    # client.  PG-USERNAME is the requested PostgreSQL user name.  The
+    # existence of a record specifies that SYSTEM-USERNAME may connect as
+    # PG-USERNAME.
+    #
+    # If SYSTEM-USERNAME starts with a slash (/), it will be treated as a
+    # regular expression.  Optionally this can contain a capture (a
+    # parenthesized subexpression).  The substring matching the capture
+    # will be substituted for \1 (backslash-one) if present in
+    # PG-USERNAME.
+    #
+    # PG-USERNAME can be "all", a user name, a group name prefixed with "+", or
+    # a regular expression (if it starts with a slash (/)).  If it is a regular
+    # expression, the substring matching with \1 has no effect.
+    #
+    # Multiple maps may be specified in this file and used by pg_hba.conf.
+    #
+    # No map names are defined in the default configuration.  If all
+    # system user names and PostgreSQL user names are the same, you don't
+    # need anything in this file.
+    #
+    # ---------------
+    # Include Records
+    # ---------------
+    #
+    # This file allows the inclusion of external files or directories holding
+    # more records, using the following keywords:
+    #
+    # include           FILE
+    # include_if_exists FILE
+    # include_dir       DIRECTORY
+    #
+    # FILE is the file name to include, and DIR is the directory name containing
+    # the file(s) to include.  Any file in a directory will be loaded if suffixed
+    # with ".conf".  The files of a directory are ordered by name.
+    # include_if_exists ignores missing files.  FILE and DIRECTORY can be
+    # specified as a relative or an absolute path, and can be double-quoted if
+    # they contain spaces.
+    #
+    # -------------------------------
+    # Miscellaneous
+    # -------------------------------
+    #
+    # This file is read on server startup and when the postmaster receives
+    # a SIGHUP signal.  If you edit the file on a running system, you have
+    # to SIGHUP the postmaster for the changes to take effect.  You can
+    # use "pg_ctl reload" to do that.
+
+    # Put your actual configuration here
+    # ----------------------------------
+
+    # MAPNAME       SYSTEM-USERNAME         PG-USERNAME
+  postgresql.conf: |
+    data_directory = '/data' 
+    hba_file = '/config/pg_hba.conf'
+    ident_file = '/config/pg_ident.conf'
+
+    port = 5432
+    listen_addresses = '*'
+    max_connections = 100
+    dynamic_shared_memory_type = posix
+    max_wal_size = 1GB
+    min_wal_size = 80MB
+    log_timezone = 'UTC'
+    datestyle = 'iso, mdy'
+    timezone = 'UTC'
+
+    #locale settings
+    lc_messages = 'en_US.UTF-8' # locale for system error message
+    lc_monetary = 'en_US.UTF-8' # locale for monetary formatting
+    lc_numeric = 'en_US.UTF-8' # locale for number formatting
+    lc_time = 'en_US.UTF-8' # locale for time formatting
+
+    default_text_search_config = 'pg_catalog.english'
+
+    hot_standby = on
+    checkpoint_timeout = 30min
+    shared_buffers = 512MB
+    effective_cache_size = 1GB
+    maintenance_work_mem = 128MB
+    work_mem = 4MB
+    max_parallel_workers_per_gather = 1
+    max_parallel_workers = 1
+    max_parallel_maintenance_workers = 1
+kind: ConfigMap
+metadata:
+  labels:
+    io.kompose.service: postgres-2
+  name: postgres-2-config
