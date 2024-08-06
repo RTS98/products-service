@@ -14,6 +14,7 @@ data:
     local   replication     all                                     trust
     host    replication     all             127.0.0.1/32            trust
     host    replication     all             ::1/128                 trust
+    host    replication     replicationuser             0.0.0.0/0                 md5
 
     host all all all scram-sha-256
   pg_ident.conf: |
@@ -124,5 +125,5 @@ data:
 kind: ConfigMap
 metadata:
   labels:
-    io.kompose.service: postgres-2
+    service: postgres-replica
   name: postgres-2-config

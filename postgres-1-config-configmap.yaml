@@ -122,5 +122,5 @@ data:
 kind: ConfigMap
 metadata:
   labels:
-    io.kompose.service: postgres
+    service: postgres-primary
   name: postgres-1-config

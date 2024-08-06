@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pgpool
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pgpool
+  template:
+    metadata:
+      labels:
+        app: pgpool
+    spec:
+      containers:
+        - name: pgpool
+          image: bitnami/pgpool:latest
+          ports:
+            - containerPort: 5432
+          env:
+            - name: PGPOOL_ADMIN_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: database
+                  key: database-username
+            - name: PGPOOL_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: database
+                  key: database-password
+            - name: PGPOOL_POSTGRES_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: database
+                  key: database-username
+            - name: PGPOOL_POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: database
+                  key: database-password
+            - name: PGPOOL_BACKEND_NODES
+              value: "0:primary-db-service:5432;1:replica-db-service:5432;2:replica-db-service:5432"
+            - name: PGPOOL_SR_CHECK_USER
+              valueFrom:
+                secretKeyRef:
+                  name: database
+                  key: database-username
+            - name: PGPOOL_SR_CHECK_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: database
+                  key: database-password
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pgpool
+  labels:
+    app: pgpool
+spec:
+  ports:
+    - port: 5432
+      targetPort: 5432
+  selector:
+    app: pgpool

@@ -26,5 +26,5 @@ data:
 kind: ConfigMap
 metadata:
   labels:
-    io.kompose.service: postgres
+    service: postgres-primary
   name: init-db-config
