@@ -1,11 +1,6 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  # annotations:
-  #   kompose.cmd: kompose convert
-  #   kompose.version: 1.34.0 (HEAD)
-  # labels:
-  #   io.kompose.service: postgres
   name: postgres-replica
 spec:
   replicas: 2
@@ -27,18 +22,16 @@ spec:
           command: ["bash", "-c"]
           args:
             - |
-              PGPASSWORD=replication pg_basebackup -h postgres.default.svc.cluster.local -p 5432 -U replicationUser -D /data/pgdata -Fp -Xs -R
+              PGPASSWORD=replication pg_basebackup -h postgres.default.svc.cluster.local -p 5432 -U replicationuser -D /data/pgdata -Fp -Xs -R
           securityContext:
             runAsUser: 0
             runAsGroup: 0
           volumeMounts:
             - mountPath: /data
               name: postgres-data
-              subPath: pgdata
               readOnly: false
       containers:
         - args:
-            - postgres
             - -c
             - config_file=/config/postgresql.conf
           env:

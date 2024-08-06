@@ -21,6 +21,8 @@ data:
               REFERENCES idempotency_key(id)
               ON DELETE CASCADE
     );
+
+    CREATE ROLE replicationuser WITH REPLICATION LOGIN ENCRYPTED PASSWORD 'replication';
 kind: ConfigMap
 metadata:
   labels:
