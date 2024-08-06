@@ -58,5 +58,6 @@ spec:
                     operator: In
                     values:
                       - products
+                      - postgres
               topologyKey: "kubernetes.io/hostname"
       restartPolicy: Always
