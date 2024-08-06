@@ -7,13 +7,20 @@ spec:
     storage: 10Gi
   accessModes:
     - ReadWriteOnce
-  local:
-    path: /data/pgdata
-  nodeAffinity:
-    required:
-      nodeSelectorTerms:
-        - matchExpressions:
-            - key: io.kompose.service
-              operator: In
-              values:
-                - postgres
+  hostPath:
+    path: /data/
+  storageClassName: standard
+  
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgres-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+  storageClassName: standard
+  volumeName: postgres-pv

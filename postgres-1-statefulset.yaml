@@ -6,7 +6,7 @@ metadata:
     kompose.version: 1.34.0 (HEAD)
   labels:
     io.kompose.service: postgres
-  name: postgres
+  name: postgres-primary
 spec:
   replicas: 1
   serviceName: postgres
@@ -60,7 +60,7 @@ spec:
                   name: database
                   key: database-password
           image: postgres:16.3
-          name: postgres
+          name: postgres-primary
           ports:
             - containerPort: 5432
               protocol: TCP
@@ -91,13 +91,6 @@ spec:
         - configMap:
             name: init-db-config
           name: init-db-config
-  volumeClaimTemplates:
-    - metadata:
-        name: postgres-data
-        labels:
-          io.kompose.service: postgres
-      spec:
-        accessModes: ["ReadWriteOnce"]
-        resources:
-          requests:
-            storage: 10Gi
+        - name: postgres-data
+          persistentVolumeClaim:
+            claimName: postgres-pvc
