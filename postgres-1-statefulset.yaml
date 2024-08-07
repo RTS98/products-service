@@ -35,7 +35,6 @@ spec:
           volumeMounts:
             - mountPath: /data
               name: postgres-data
-              subPath: pgdata
               readOnly: false
       containers:
         - args:
@@ -71,7 +70,6 @@ spec:
               name: postgres-1-config
             - mountPath: /data
               name: postgres-data
-              subPath: pgdata
               readOnly: false
       affinity:
         podAntiAffinity:
