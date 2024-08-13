@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  Header,
   Param,
   Post,
   Put,
@@ -20,6 +21,7 @@ export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
   @Get()
+  @Header('Cache-Control', 'private, max-age=60')
   async getAll(): Promise<ProductResponse[]> {
     return this.productsService.findAll();
   }
